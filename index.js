@@ -1,32 +1,39 @@
-// index.js
-// where your node app starts
+import express, { response } from "express";
+import dotenv from "dotenv";
+import cors from "cors";
 
-// init project
-var express = require('express');
-var app = express();
+let app = express();
+dotenv.config();
+app.use(cors());
+app.use(express.static("public"));
 
-// enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-// so that your API is remotely testable by FCC 
-var cors = require('cors');
-app.use(cors({optionsSuccessStatus: 200}));  // some legacy browsers choke on 204
+app.get("/", (req, res) => {
+  res.sendFile("/Users/mukulpretham/Documents/GitHub/Timestamp-Api/views/index.html");
+})
 
-// http://expressjs.com/en/starter/static-files.html
-app.use(express.static('public'));
+app.get("/api/:date", (req, res) => {
+  let date = req.params.date;
+  let UNIX;
+  let UTC;
+  if(!isNaN(Number(date))){
+    date = Number(date);
+    UNIX = date;
+    UTC = new Date(date).toUTCString();
+  }else {
+    let parsedDate = new Date(date);
+    if (parsedDate.toString() === "Invalid Date") {
+      return res.json({ error: "Invalid Date" });
+    }
+    UNIX = parsedDate.getTime();
+    UTC = parsedDate.toUTCString();
+  }
+  res.json({
+    unix: UNIX,
+    utc: UTC 
+  })
+})
 
-// http://expressjs.com/en/starter/basic-routing.html
-app.get("/", function (req, res) {
-  res.sendFile(__dirname + '/views/index.html');
-});
+app.listen(process.env.PORT || 3000, () => {
+  console.log("server has started");
+})
 
-
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
-});
-
-
-
-// Listen on port set in environment variable or default to 3000
-var listener = app.listen(process.env.PORT || 3000, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
-});
