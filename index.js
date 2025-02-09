@@ -7,6 +7,13 @@ dotenv.config();
 app.use(cors());
 app.use(express.static("public"));
 
+app.get("/api",(req,res)=>{
+  let response = {
+    unix: Date.now(),
+    utc: new Date().toUTCString()
+  }
+  res.json(response);
+})
 
 app.get("/api/:date", (req, res) => {
   let date = req.params.date;
